@@ -49,9 +49,9 @@ if uploaded_file:
     # =========================
     # BUSCA
     # =========================
-    st.sidebar.subheader("🔎 Busca por Produto")
+    st.sidebar.subheader("🔎 Busca")
 
-    busca_produto = st.sidebar.text_input("Nome (Marca Comercial)")
+    busca_produto = st.sidebar.text_input("Marca Comercial")
     busca_lote = st.sidebar.text_input("Nº do Lote")
 
     if busca_produto:
@@ -65,12 +65,20 @@ if uploaded_file:
         ]
 
     # =========================
-    # TOGGLE
+    # APENAS COM SALDO
     # =========================
-    apenas_saldo = st.sidebar.toggle("Apenas com saldo", value=False)
+    apenas_saldo = st.sidebar.toggle("Apenas com saldo", value=True)
 
     if apenas_saldo:
         df_filtrado = df_filtrado[df_filtrado["Saldo"] > 0]
+
+    # =========================
+    # AGRUPAMENTO (PROFISSIONAL)
+    # =========================
+    df_filtrado = df_filtrado.groupby(
+        ["Marca Comercial", "Nº do Lote", "Empresa", "Descrição da Embalagem"],
+        as_index=False
+    )["Saldo"].sum()
 
     # =========================
     # MÉTRICAS
@@ -80,58 +88,79 @@ if uploaded_file:
     col1, col2, col3 = st.columns(3)
 
     col1.metric("Total em Estoque", f"{df_filtrado['Saldo'].sum():,.2f}")
-    col2.metric("Registros", len(df_filtrado))
+    col2.metric("Produtos", df_filtrado["Marca Comercial"].nunique())
     col3.metric("Empresas", df_filtrado["Empresa"].nunique())
 
     # =========================
-    # CARDS (HTML via COMPONENTS)
+    # CARDS PROFISSIONAIS
     # =========================
     st.subheader("📦 Produtos")
 
-    df_show = df_filtrado.head(50)
+    df_show = df_filtrado.sort_values(by="Saldo", ascending=False).head(50)
 
-    html_cards = """
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+    html = """
+    <style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+    }
+    .card {
+        background: #f9fafb;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .titulo {
+        color: #2e7d32;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .lote {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        display: inline-block;
+        margin-top: 5px;
+    }
+    .saldo {
+        font-size: 18px;
+        font-weight: bold;
+    }
+    </style>
+
+    <div class="grid">
     """
 
     for _, row in df_show.iterrows():
-        html_cards += f"""
-        <div style="
-            background-color:#f9fafb;
-            padding:20px;
-            border-radius:12px;
-            border-left:6px solid #2e7d32;
-            box-shadow:0 2px 6px rgba(0,0,0,0.05);
-        ">
-            <h4 style="margin:0;color:#2e7d32;">{row['Marca Comercial']}</h4>
+        cor = "#2e7d32" if row["Saldo"] > 0 else "#c62828"
 
-            <p style="margin:5px 0;">📦 {row['Descrição da Embalagem']}</p>
+        html += f"""
+        <div class="card" style="border-left:6px solid {cor};">
+            <div class="titulo">{row['Marca Comercial']}</div>
+            
+            <div>📦 {row['Descrição da Embalagem']}</div>
+            
+            <div class="lote">Lote: {row['Nº do Lote']}</div>
 
-            <span style="
-                background:#d1fae5;
-                color:#065f46;
-                padding:4px 10px;
-                border-radius:8px;
-                font-size:12px;">
-                Lote: {row['Nº do Lote']}
-            </span>
-
-            <p style="margin-top:10px;">🏢 {row['Empresa']}</p>
+            <div style="margin-top:10px;">🏢 {row['Empresa']}</div>
 
             <hr>
 
             <div style="display:flex; justify-content:space-between;">
-                <span><b>SALDO DISPONÍVEL</b></span>
-                <span style="color:#1d4ed8; font-size:18px;">
-                    <b>{row['Saldo']}</b>
+                <span>SALDO</span>
+                <span class="saldo" style="color:{cor};">
+                    {row['Saldo']}
                 </span>
             </div>
         </div>
         """
 
-    html_cards += "</div>"
+    html += "</div>"
 
-    components.html(html_cards, height=800, scrolling=True)
+    components.html(html, height=900, scrolling=True)
 
     # =========================
     # DOWNLOAD
