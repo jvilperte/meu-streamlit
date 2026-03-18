@@ -11,16 +11,19 @@ st.set_page_config(
 )
 
 # =========================
-# CABEÇALHO COM LOGO CIDASC
+# CABEÇALHO LIMPO (SEM LOGO)
 # =========================
 st.markdown("""
-<div style="display:flex; align-items:center; gap:15px;">
-    <img src="https://i.imgur.com/7v5QK6T.png" width="90">
-    <div>
-        <div style="font-size:13px;">Departamento de Defesa Sanitária Vegetal - DEDEV</div>
-        <div style="font-size:13px;">Divisão de Fiscalização de Insumos Agrícolas - DIFIA</div>
-        <h2 style="margin-top:5px;">Sistema de Controle de Estoque de Agrotóxicos</h2>
+<div style="border-left:6px solid #2e7d32; padding-left:15px;">
+    <div style="font-size:13px; color:#4b5563;">
+        Departamento de Defesa Sanitária Vegetal - DEDEV
     </div>
+    <div style="font-size:13px; color:#4b5563;">
+        Divisão de Fiscalização de Insumos Agrícolas - DIFIA
+    </div>
+    <h2 style="margin-top:5px; color:#1f2937;">
+        Sistema de Controle de Estoque de Agrotóxicos
+    </h2>
 </div>
 <hr>
 """, unsafe_allow_html=True)
@@ -122,7 +125,7 @@ if uploaded_file:
     .lote {
         background:#d1fae5;
         color:#065f46;
-        padding:8px 14px;
+        padding:10px 16px;
         border-radius:10px;
         font-size:18px;
         font-weight:bold;
