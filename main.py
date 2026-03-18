@@ -6,20 +6,19 @@ import streamlit.components.v1 as components
 # CONFIG
 # =========================
 st.set_page_config(
-    page_title="Sistema de Controle de Estoque de Agrotóxicos",
+    page_title="Estoque de Agrotóxicos",
     layout="wide"
 )
 
 # =========================
-# CABEÇALHO INSTITUCIONAL
+# CABEÇALHO COM LOGO CIDASC
 # =========================
 st.markdown("""
-<div style="display:flex; align-items:center; gap:20px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Governo_de_Santa_Catarina_logo.png" width="120">
+<div style="display:flex; align-items:center; gap:15px;">
+    <img src="https://i.imgur.com/7v5QK6T.png" width="90">
     <div>
-        <h3 style="margin:0;">CIDASC</h3>
-        <div>Departamento de Defesa Sanitária Vegetal - DEDEV</div>
-        <div>Divisão de Fiscalização de Insumos Agrícolas - DIFIA</div>
+        <div style="font-size:13px;">Departamento de Defesa Sanitária Vegetal - DEDEV</div>
+        <div style="font-size:13px;">Divisão de Fiscalização de Insumos Agrícolas - DIFIA</div>
         <h2 style="margin-top:5px;">Sistema de Controle de Estoque de Agrotóxicos</h2>
     </div>
 </div>
@@ -38,7 +37,7 @@ if uploaded_file:
     # =========================
     # FILTROS
     # =========================
-    st.sidebar.title("Filtros")
+    st.sidebar.title("🌱 Filtros de Estoque")
 
     def filtro(label, coluna):
         opcoes = ["TODOS"] + sorted(df[coluna].dropna().unique().tolist())
@@ -48,11 +47,11 @@ if uploaded_file:
         return pd.Series([True] * len(df))
 
     df_filtrado = df[
-        filtro("Regional", "Departamento Regional") &
-        filtro("Município", "Município") &
-        filtro("Empresa", "Empresa") &
-        filtro("Documento", "Nº Documento") &
-        filtro("Embalagem", "Descrição da Embalagem")
+        filtro("📍 Regional", "Departamento Regional") &
+        filtro("🏙️ Município", "Município") &
+        filtro("🏢 Empresa", "Empresa") &
+        filtro("📄 Nº Documento", "Nº Documento") &
+        filtro("📦 Embalagem", "Descrição da Embalagem")
     ]
 
     st.sidebar.markdown("---")
@@ -62,7 +61,7 @@ if uploaded_file:
 
     if busca_produto:
         df_filtrado = df_filtrado[
-            df_filtrado["Marca Comercial"].str.contains(busca_produto, case=False, na=False)
+            df_filtrado["Marca Comercial"].astype(str).str.contains(busca_produto, case=False, na=False)
         ]
 
     if busca_lote:
@@ -70,8 +69,13 @@ if uploaded_file:
             df_filtrado["Nº do Lote"].astype(str).str.contains(busca_lote, case=False, na=False)
         ]
 
+    apenas_saldo = st.sidebar.toggle("Apenas com saldo", value=True)
+
+    if apenas_saldo:
+        df_filtrado = df_filtrado[df_filtrado["Saldo"] > 0]
+
     # =========================
-    # CONSOLIDAÇÃO
+    # AGRUPAMENTO
     # =========================
     df_filtrado = df_filtrado.groupby(
         ["Marca Comercial", "Nº do Lote", "Empresa", "Descrição da Embalagem"],
@@ -79,9 +83,9 @@ if uploaded_file:
     )["Saldo"].sum()
 
     # =========================
-    # INDICADORES
+    # MÉTRICAS
     # =========================
-    st.subheader("Indicadores")
+    st.subheader("📊 Indicadores")
 
     c1, c2, c3 = st.columns(3)
 
@@ -92,7 +96,7 @@ if uploaded_file:
     # =========================
     # CARDS
     # =========================
-    st.subheader("Estoque Detalhado")
+    st.subheader("📦 Produtos")
 
     df_show = df_filtrado.sort_values(by="Saldo", ascending=False).head(50)
 
@@ -100,32 +104,33 @@ if uploaded_file:
     <style>
     .grid {
         display:grid;
-        grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
         gap:15px;
     }
     .card {
-        background:white;
-        padding:18px;
-        border-radius:10px;
-        border:1px solid #e5e7eb;
+        background:#f9fafb;
+        padding:20px;
+        border-radius:12px;
+        border-left:6px solid #2e7d32;
+        box-shadow:0 2px 6px rgba(0,0,0,0.05);
     }
     .titulo {
+        color:#2e7d32;
         font-weight:bold;
-        color:#1f2937;
-        font-size:15px;
+        font-size:16px;
     }
     .lote {
-        margin-top:8px;
+        background:#d1fae5;
+        color:#065f46;
+        padding:8px 14px;
+        border-radius:10px;
         font-size:18px;
         font-weight:bold;
-        color:#065f46;
-        background:#d1fae5;
-        padding:6px 12px;
-        border-radius:8px;
         display:inline-block;
+        margin-top:8px;
     }
     .saldo {
-        font-size:20px;
+        font-size:18px;
         font-weight:bold;
     }
     </style>
@@ -134,10 +139,10 @@ if uploaded_file:
     """
 
     for _, row in df_show.iterrows():
-        cor = "#2e7d32" if row["Saldo"] > 0 else "#b91c1c"
+        cor = "#2e7d32" if row["Saldo"] > 0 else "#c62828"
 
         html += f"""
-        <div class="card">
+        <div class="card" style="border-left:6px solid {cor};">
             <div class="titulo">{row['Marca Comercial']}</div>
 
             <div>📦 {row['Descrição da Embalagem']}</div>
@@ -149,7 +154,7 @@ if uploaded_file:
             <hr>
 
             <div style="display:flex; justify-content:space-between;">
-                <span>Saldo</span>
+                <span>SALDO</span>
                 <span class="saldo" style="color:{cor};">
                     {row['Saldo']}
                 </span>
@@ -162,4 +167,4 @@ if uploaded_file:
     components.html(html, height=900, scrolling=True)
 
 else:
-    st.info("Envie a planilha para iniciar.")
+    st.info("👆 Envie a planilha para começar.")
