@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import streamlit.components.v1 as components
 
 # =========================
 # CONFIGURAÇÃO
@@ -83,55 +84,54 @@ if uploaded_file:
     col3.metric("Empresas", df_filtrado["Empresa"].nunique())
 
     # =========================
-    # FUNÇÃO DE CARD (CORRIGIDA)
-    # =========================
-    def gerar_card(row):
-        return f"""
-<div style="background-color:#f9fafb;
-            padding:20px;
-            border-radius:12px;
-            margin-bottom:15px;
-            border-left:6px solid #2e7d32;
-            box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-
-    <h4 style="margin:0;color:#2e7d32;">{row['Marca Comercial']}</h4>
-
-    <p style="margin:5px 0;">📦 {row['Descrição da Embalagem']}</p>
-
-    <span style="background:#d1fae5;
-                 color:#065f46;
-                 padding:4px 10px;
-                 border-radius:8px;
-                 font-size:12px;">
-        Lote: {row['Nº do Lote']}
-    </span>
-
-    <p style="margin-top:10px;">🏢 {row['Empresa']}</p>
-
-    <hr>
-
-    <div style="display:flex; justify-content:space-between;">
-        <span><b>SALDO DISPONÍVEL</b></span>
-        <span style="color:#1d4ed8; font-size:18px;">
-            <b>{row['Saldo']}</b>
-        </span>
-    </div>
-
-</div>
-"""
-
-    # =========================
-    # EXIBIÇÃO EM CARDS
+    # CARDS (HTML via COMPONENTS)
     # =========================
     st.subheader("📦 Produtos")
 
     df_show = df_filtrado.head(50)
 
-    cols = st.columns(2)
+    html_cards = """
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+    """
 
-    for i, (_, row) in enumerate(df_show.iterrows()):
-        with cols[i % 2]:
-            st.markdown(gerar_card(row), unsafe_allow_html=True)
+    for _, row in df_show.iterrows():
+        html_cards += f"""
+        <div style="
+            background-color:#f9fafb;
+            padding:20px;
+            border-radius:12px;
+            border-left:6px solid #2e7d32;
+            box-shadow:0 2px 6px rgba(0,0,0,0.05);
+        ">
+            <h4 style="margin:0;color:#2e7d32;">{row['Marca Comercial']}</h4>
+
+            <p style="margin:5px 0;">📦 {row['Descrição da Embalagem']}</p>
+
+            <span style="
+                background:#d1fae5;
+                color:#065f46;
+                padding:4px 10px;
+                border-radius:8px;
+                font-size:12px;">
+                Lote: {row['Nº do Lote']}
+            </span>
+
+            <p style="margin-top:10px;">🏢 {row['Empresa']}</p>
+
+            <hr>
+
+            <div style="display:flex; justify-content:space-between;">
+                <span><b>SALDO DISPONÍVEL</b></span>
+                <span style="color:#1d4ed8; font-size:18px;">
+                    <b>{row['Saldo']}</b>
+                </span>
+            </div>
+        </div>
+        """
+
+    html_cards += "</div>"
+
+    components.html(html_cards, height=800, scrolling=True)
 
     # =========================
     # DOWNLOAD
