@@ -83,49 +83,50 @@ if uploaded_file:
     col3.metric("Empresas", df_filtrado["Empresa"].nunique())
 
     # =========================
-    # CARDS (VISUAL PRINCIPAL)
+    # FUNÇÃO DE CARD (CORRIGIDA)
     # =========================
-    st.subheader("📦 Produtos")
-
     def gerar_card(row):
         return f"""
-        <div style="
-            background-color:#f9fafb;
+<div style="background-color:#f9fafb;
             padding:20px;
             border-radius:12px;
             margin-bottom:15px;
             border-left:6px solid #2e7d32;
-            box-shadow:0 2px 6px rgba(0,0,0,0.05);
-        ">
-            <h4 style="margin:0;color:#2e7d32;">{row['Marca Comercial']}</h4>
-            
-            <p style="margin:5px 0;">📦 {row['Descrição da Embalagem']}</p>
-            
-            <span style="
-                background:#d1fae5;
-                color:#065f46;
-                padding:4px 10px;
-                border-radius:8px;
-                font-size:12px;
-            ">
-                Lote: {row['Nº do Lote']}
-            </span>
+            box-shadow:0 2px 6px rgba(0,0,0,0.05);">
 
-            <p style="margin-top:10px;">🏢 {row['Empresa']}</p>
+    <h4 style="margin:0;color:#2e7d32;">{row['Marca Comercial']}</h4>
 
-            <hr style="margin:10px 0;">
+    <p style="margin:5px 0;">📦 {row['Descrição da Embalagem']}</p>
 
-            <div style="display:flex; justify-content:space-between;">
-                <span><b>SALDO DISPONÍVEL</b></span>
-                <span style="color:#1d4ed8; font-size:18px;"><b>{row['Saldo']}</b></span>
-            </div>
-        </div>
-        """
+    <span style="background:#d1fae5;
+                 color:#065f46;
+                 padding:4px 10px;
+                 border-radius:8px;
+                 font-size:12px;">
+        Lote: {row['Nº do Lote']}
+    </span>
 
-    # Limite para performance
+    <p style="margin-top:10px;">🏢 {row['Empresa']}</p>
+
+    <hr>
+
+    <div style="display:flex; justify-content:space-between;">
+        <span><b>SALDO DISPONÍVEL</b></span>
+        <span style="color:#1d4ed8; font-size:18px;">
+            <b>{row['Saldo']}</b>
+        </span>
+    </div>
+
+</div>
+"""
+
+    # =========================
+    # EXIBIÇÃO EM CARDS
+    # =========================
+    st.subheader("📦 Produtos")
+
     df_show = df_filtrado.head(50)
 
-    # Layout em 2 colunas (igual sistema moderno)
     cols = st.columns(2)
 
     for i, (_, row) in enumerate(df_show.iterrows()):
